@@ -1,10 +1,10 @@
-import { useReducer } from 'react';
-import './App.css';
+import { useReducer } from "react";
+import "./App.css";
 
 // The game starts with nine empty squares.
 const initialState = {
   board: Array(9).fill(null),
-  currentPlayer: 'X',
+  currentPlayer: "X",
 };
 
 // This reducer manages our game state.
@@ -21,11 +21,7 @@ const winningCombinations = [
 
 function calculateWinner(board) {
   for (const [a, b, c] of winningCombinations) {
-    if (
-      board[a] &&
-      board[a] === board[b] &&
-      board[a] === board[c]
-    ) {
+    if (board[a] && board[a] === board[b] && board[a] === board[c]) {
       return board[a];
     }
   }
@@ -35,10 +31,10 @@ function calculateWinner(board) {
 
 function gameReducer(state, action) {
   switch (action.type) {
-    case 'MAKE_MOVE': {
+    case "MAKE_MOVE": {
       const index = action.payload;
 
-      // Stop moves after a win or draw.
+      // Prevent overwriting squares or playing after game ends
       if (
         state.board[index] !== null ||
         calculateWinner(state.board) ||
@@ -53,9 +49,13 @@ function gameReducer(state, action) {
       return {
         ...state,
         board: newBoard,
-        currentPlayer:
-          state.currentPlayer === 'X' ? 'O' : 'X',
+        currentPlayer: state.currentPlayer === "X" ? "O" : "X",
       };
+    }
+
+    // Restart the game
+    case "RESET": {
+      return initialState;
     }
 
     default:
@@ -64,30 +64,32 @@ function gameReducer(state, action) {
 }
 
 function App() {
-  const [state, dispatch] = useReducer(
-    gameReducer,
-    initialState
-  );
+  const [state, dispatch] = useReducer(gameReducer, initialState);
 
   const winner = calculateWinner(state.board);
 
-  const isDraw =
-    !winner && state.board.every((cell) => cell !== null);
+  const isDraw = !winner && state.board.every((cell) => cell !== null);
 
   let status;
 
   if (winner) {
     status = `Winner: ${winner}`;
   } else if (isDraw) {
-    status = 'Draw!';
+    status = "Draw!";
   } else {
     status = `Next Player: ${state.currentPlayer}`;
   }
 
   function handleSquareClick(index) {
     dispatch({
-      type: 'MAKE_MOVE',
+      type: "MAKE_MOVE",
       payload: index,
+    });
+  }
+
+  function handleReset() {
+    dispatch({
+      type: "RESET",
     });
   }
 
@@ -108,6 +110,10 @@ function App() {
           </button>
         ))}
       </div>
+
+      <button className="reset-button" onClick={handleReset}>
+        Restart Game
+      </button>
     </main>
   );
 }
