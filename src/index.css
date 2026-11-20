@@ -14,3 +14,13 @@ body {
 button {
   font-family: inherit;
 }
+
+html {
+  min-height: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  overflow-x: hidden;
+  overflow-y: auto;
+}

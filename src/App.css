@@ -4,6 +4,8 @@
   align-items: center;
   justify-content: center;
   min-height: 100vh;
+  min-height: 100dvh;
+  width: 100%;
   text-align: center;
   padding: 20px;
 }
@@ -73,5 +75,21 @@
 
 .reset-button:hover {
   background-color: #1d4ed8;
+}
+
+@media (max-width: 480px) {
+  .game-container {
+    justify-content: safe center;
+    padding: 20px 12px;
+  }
+
+  .game-container h2 {
+    font-size: 20px;
+    margin-bottom: 20px;
+  }
+
+  .reset-button {
+    margin-top: 20px;
+  }
 }
 
