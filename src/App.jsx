@@ -1,4 +1,4 @@
-import { useReducer } from "react";
+import { useEffect, useReducer } from 'react';
 import "./App.css";
 
 // The game starts with nine empty squares.
@@ -36,10 +36,11 @@ function gameReducer(state, action) {
 
       // Prevent overwriting squares or playing after game ends
       if (
-        state.board[index] !== null ||
-        calculateWinner(state.board) ||
-        state.board.every((cell) => cell !== null)
-      ) {
+  state.currentPlayer !== 'X' ||
+  state.board[index] !== null ||
+  calculateWinner(state.board) ||
+  state.board.every((cell) => cell !== null)
+) {
         return state;
       }
 
@@ -52,7 +53,37 @@ function gameReducer(state, action) {
         currentPlayer: state.currentPlayer === "X" ? "O" : "X",
       };
     }
+// Computer chooses a random empty square
+case 'COMPUTER_MOVE': {
+  if (
+    state.currentPlayer !== 'O' ||
+    calculateWinner(state.board) ||
+    state.board.every((cell) => cell !== null)
+  ) {
+    return state;
+  }
 
+  const emptySquares = state.board
+    .map((cell, index) => (cell === null ? index : null))
+    .filter((index) => index !== null);
+
+  if (emptySquares.length === 0) {
+    return state;
+  }
+
+  const randomIndex = Math.floor(
+    Math.random() * emptySquares.length
+  );
+
+  const newBoard = [...state.board];
+  newBoard[emptySquares[randomIndex]] = 'O';
+
+  return {
+    ...state,
+    board: newBoard,
+    currentPlayer: 'X',
+  };
+}
     // Restart the game
     case "RESET": {
       return initialState;
@@ -65,6 +96,21 @@ function gameReducer(state, action) {
 
 function App() {
   const [state, dispatch] = useReducer(gameReducer, initialState);
+  useEffect(() => {
+  if (
+    state.currentPlayer !== 'O' ||
+    calculateWinner(state.board) ||
+    state.board.every((cell) => cell !== null)
+  ) {
+    return;
+  }
+
+  const timer = setTimeout(() => {
+    dispatch({ type: 'COMPUTER_MOVE' });
+  }, 500);
+
+  return () => clearTimeout(timer);
+}, [state]);
 
   const winner = calculateWinner(state.board);
 
@@ -77,8 +123,11 @@ function App() {
   } else if (isDraw) {
     status = "Draw!";
   } else {
-    status = `Next Player: ${state.currentPlayer}`;
-  }
+  status =
+    state.currentPlayer === 'X'
+      ? 'Your Turn (X)'
+      : 'Computer Thinking...';
+}
 
   function handleSquareClick(index) {
     dispatch({
